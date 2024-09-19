@@ -3,12 +3,13 @@ package com.unitbean.library.db.entity
 import jakarta.persistence.*
 import org.springframework.data.util.ProxyUtils
 import java.io.Serializable
-import java.util.UUID
+import java.util.*
 
 @MappedSuperclass
 open class BaseEntity : Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false)
     var id: UUID? = null
 
     @Column(name = "is_deleted", nullable = false)

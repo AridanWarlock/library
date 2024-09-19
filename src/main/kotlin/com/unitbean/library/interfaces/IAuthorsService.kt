@@ -7,7 +7,7 @@ import java.util.*
 
 interface IAuthorsService {
     fun getAll(): List<AuthorResponse>
-    fun getById(id: UUID): AuthorResponse?
+    fun getById(id: UUID): AuthorResponse
 
     fun create(request: AuthorCreateRequest): ResponseEntity<UUID>
 }

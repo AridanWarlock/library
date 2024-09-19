@@ -7,9 +7,11 @@ import com.unitbean.library.interfaces.IBooksService
 import com.unitbean.library.models.requests.BookCreateRequest
 import com.unitbean.library.models.requests.BooksTask1Request
 import com.unitbean.library.models.responses.BookResponse
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @Service
@@ -38,8 +40,12 @@ class BooksService(
         return ResponseEntity(savedBook.id!!, HttpStatus.CREATED)
     }
 
-    override fun getById(id: UUID): BookResponse? {
-        return booksRepository.findById(id).map { BookResponse.of(it) }.orElse(null)
+    override fun getById(id: UUID): BookResponse {
+        val book = booksRepository.findByIdOrNull(id)
+
+        book ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Book not found")
+
+        return BookResponse.of(book)
     }
 
     override fun getAllByTask1(request: BooksTask1Request): List<BookResponse> {

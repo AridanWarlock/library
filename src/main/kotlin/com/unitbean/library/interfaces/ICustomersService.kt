@@ -9,7 +9,7 @@ import java.util.UUID
 
 interface ICustomersService {
     fun getAll(): List<CustomerResponse>
-    fun getById(id: UUID): CustomerResponse?
+    fun getById(id: UUID): CustomerResponse
 
     fun getAllByTask2(request: CustomersTask2Request): List<CustomerResponse>
     fun getAllByTask2NativeQuery(request: CustomersTask2Request): List<CustomerResponse>

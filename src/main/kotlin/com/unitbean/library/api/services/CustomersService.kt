@@ -8,9 +8,11 @@ import com.unitbean.library.models.requests.CustomerCreateRequest
 import com.unitbean.library.models.requests.CustomersTask2Request
 import com.unitbean.library.models.requests.CustomersTask3Request
 import com.unitbean.library.models.responses.CustomerResponse
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @Service
@@ -22,8 +24,12 @@ class CustomersService(
         return customersRepository.findAllByIsDeletedIsFalse().map { CustomerResponse.of(it) }
     }
 
-    override fun getById(id: UUID): CustomerResponse? {
-        return customersRepository.findById(id).map { CustomerResponse.of(it) }.orElse(null)
+    override fun getById(id: UUID): CustomerResponse {
+        val customer = customersRepository.findByIdOrNull(id)
+
+        customer ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer not found")
+
+        return CustomerResponse.of(customer)
     }
 
     override fun getAllByTask2(request: CustomersTask2Request): List<CustomerResponse> {

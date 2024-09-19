@@ -9,7 +9,7 @@ import java.util.UUID
 interface IBooksService {
     fun create(request: BookCreateRequest): ResponseEntity<UUID>
     fun getAll(): List<BookResponse>
-    fun getById(id: UUID): BookResponse?
+    fun getById(id: UUID): BookResponse
     fun getAllByTask1(request: BooksTask1Request): List<BookResponse>
     fun getAllByTask1NativeQuery(request: BooksTask1Request): List<BookResponse>
 }

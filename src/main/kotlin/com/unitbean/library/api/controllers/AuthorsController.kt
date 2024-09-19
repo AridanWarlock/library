@@ -11,7 +11,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-@MobRestController(value = "api/authors")
+//@CrossOrigin
+//@MobRestController(value = "api/authors")
+@RestController
+@RequestMapping("/api/authors")
 class AuthorsController (
     private val authorsService: IAuthorsService
 ){

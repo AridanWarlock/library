@@ -12,7 +12,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
-@MobRestController(value = "api/books")
+//@CrossOrigin
+//@MobRestController(value = "api/books")
+@RestController
+@RequestMapping("/api/books")
 class BooksController(
     private val booksService: IBooksService
 ) {

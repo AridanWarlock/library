@@ -12,7 +12,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-@MobRestController("api/customers")
+//@CrossOrigin
+//@MobRestController("api/customers")
+@RestController
+@RequestMapping("/api/customers")
 class CustomersController(
     private val customersService: ICustomersService
 ) {
