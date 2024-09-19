@@ -1,19 +1,41 @@
 package com.unitbean.library.api.services
 
+import com.unitbean.library.db.entity.AuthorRepository
+import com.unitbean.library.db.entity.BookModel
 import com.unitbean.library.db.entity.BooksRepository
 import com.unitbean.library.interfaces.IBooksService
+import com.unitbean.library.models.requests.BookCreateRequest
 import com.unitbean.library.models.requests.BooksTask1Request
 import com.unitbean.library.models.responses.BookResponse
-import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class BooksService(
-    val booksRepository: BooksRepository
+    private val booksRepository: BooksRepository,
+    private val authorRepository: AuthorRepository,
 ) : IBooksService {
     override fun getAll(): List<BookResponse> {
         return booksRepository.findAllByIsDeletedIsFalse().map { BookResponse.of(it) }
+    }
+
+    override fun create(request: BookCreateRequest): ResponseEntity<UUID> {
+        val authors = authorRepository.findAllById(request.authorIds)
+
+        val book = request.run {
+            BookModel(
+                title = title,
+                description = description,
+                yearOfRelease = yearOfRelease,
+                authors = authors.toMutableSet(),
+            )
+        }
+
+        val savedBook = booksRepository.save(book)
+
+        return ResponseEntity(savedBook.id!!, HttpStatus.CREATED)
     }
 
     override fun getById(id: UUID): BookResponse? {

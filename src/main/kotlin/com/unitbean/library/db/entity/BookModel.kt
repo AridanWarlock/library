@@ -34,8 +34,6 @@ class BookModel(
     ) : BaseEntity()
 
 interface BooksRepository : JpaRepository<BookModel, UUID> {
-    fun findAllByIdIn(ids: List<UUID>): List<BookModel>
-
     fun findAllByIsDeletedIsFalse(): List<BookModel>
 
     @Query(

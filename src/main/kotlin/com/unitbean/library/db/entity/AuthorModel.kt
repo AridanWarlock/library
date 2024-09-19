@@ -24,7 +24,5 @@ class AuthorModel(
 ) : BaseEntity()
 
 interface AuthorRepository : CrudRepository<AuthorModel, UUID> {
-    fun findAllByIdIn(ids: List<UUID>): List<AuthorModel>
-
     fun findAllByIsDeletedFalse(): List<AuthorModel>
 }

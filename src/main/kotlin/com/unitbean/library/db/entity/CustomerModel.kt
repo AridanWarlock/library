@@ -29,9 +29,6 @@ class CustomerModel(
 ) : BaseEntity()
 
 interface CustomersRepository : JpaRepository<CustomerModel, UUID> {
-    fun findAllByIdIn(ids: List<UUID>): List<CustomerModel>
-
-
     fun findAllByIsDeletedIsFalse(): List<CustomerModel>
 
     @Query(
