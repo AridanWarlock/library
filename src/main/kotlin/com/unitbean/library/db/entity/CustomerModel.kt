@@ -4,6 +4,7 @@ import jakarta.persistence.*
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import java.util.UUID
 
 @Entity
 @Table(name = "customers")
@@ -23,13 +24,15 @@ class CustomerModel(
         fetch = FetchType.LAZY,
         mappedBy = "customer"
     )
-    val books: MutableList<BookModel> = mutableListOf(),
+    val books: MutableSet<BookModel> = mutableSetOf(),
 
 ) : BaseEntity()
 
-interface CustomersRepository : JpaRepository<CustomerModel, Long> {
+interface CustomersRepository : JpaRepository<CustomerModel, UUID> {
+    fun findAllByIdIn(ids: List<UUID>): List<CustomerModel>
 
-    fun findAllByDeletedIsFalse(): List<CustomerModel>
+
+    fun findAllByIsDeletedIsFalse(): List<CustomerModel>
 
     @Query(
         value = """

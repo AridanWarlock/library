@@ -22,7 +22,7 @@ class BookModel(
         joinColumns = [JoinColumn(name = "book_id", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "author_id", referencedColumnName = "id")]
     )
-    val authors: MutableList<AuthorModel> = mutableListOf(),
+    val authors: MutableSet<AuthorModel> = mutableSetOf(),
 
     @Column(name = "year_of_release", nullable = false)
     val yearOfRelease: Int,
@@ -34,7 +34,9 @@ class BookModel(
     ) : BaseEntity()
 
 interface BooksRepository : JpaRepository<BookModel, UUID> {
-    fun findAllByDeletedIsFalse(): List<BookModel>
+    fun findAllByIdIn(ids: List<UUID>): List<BookModel>
+
+    fun findAllByIsDeletedIsFalse(): List<BookModel>
 
     @Query(
         value = """
@@ -57,7 +59,9 @@ interface BooksRepository : JpaRepository<BookModel, UUID> {
         select book from BookModel as book
         inner join book.authors as author
         where book.isDeleted = false and author.isDeleted = false and
-        book.yearOfRelease > :yearOfRelease and author.size > :authorsCount
+        book.yearOfRelease > :yearOfRelease
+        group by author
+        having count(author) > :authorsCount
     """)
     fun findAllByTask1(
         @Param("yearOfRelease") yearOfRelease: Int,

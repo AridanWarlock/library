@@ -2,6 +2,7 @@ package com.unitbean.library.db.entity
 
 import jakarta.persistence.*
 import org.springframework.data.repository.CrudRepository
+import java.util.UUID
 
 
 @Entity
@@ -18,10 +19,12 @@ class AuthorModel(
     val yearOfBirth: Int,
 
     @ManyToMany(mappedBy = "authors")
-    val books: List<BookModel> = listOf(),
+    val books: MutableSet<BookModel> = mutableSetOf(),
 
 ) : BaseEntity()
 
-interface AuthorRepository : CrudRepository<AuthorModel, Long> {
-    fun findAllByDeletedFalse(): List<AuthorModel>
+interface AuthorRepository : CrudRepository<AuthorModel, UUID> {
+    fun findAllByIdIn(ids: List<UUID>): List<AuthorModel>
+
+    fun findAllByIsDeletedFalse(): List<AuthorModel>
 }
