@@ -8,5 +8,5 @@ data class RemoveAuthorsFromBookRequest(
     val bookId: UUID,
 
     @JsonProperty("author_ids")
-    val authorIds: Set<UUID>
+    val authorIds: List<UUID>
 )

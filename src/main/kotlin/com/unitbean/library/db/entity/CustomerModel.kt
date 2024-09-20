@@ -29,6 +29,7 @@ class CustomerModel(
 ) : BaseEntity()
 
 interface CustomersRepository : JpaRepository<CustomerModel, UUID> {
+    fun findByIdAndIsDeletedIsFalse(id: UUID): CustomerModel?
     fun findAllByIsDeletedIsFalse(): List<CustomerModel>
     fun findAllByIdAndIsDeletedIsFalse(ids: List<UUID>): List<CustomerModel>
 

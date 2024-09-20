@@ -8,5 +8,5 @@ data class AddBooksToAuthorRequest(
     val authorId: UUID,
 
     @JsonProperty("book_ids")
-    val bookIds: Set<UUID>
+    val bookIds: List<UUID>
 )

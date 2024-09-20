@@ -14,5 +14,5 @@ data class CustomerCreateRequest(
     val phone: String,
 
     @JsonProperty("book_ids")
-    val bookIds: Set<UUID> = setOf(),
+    val bookIds: List<UUID> = listOf(),
 )

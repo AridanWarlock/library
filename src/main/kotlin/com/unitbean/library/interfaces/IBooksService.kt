@@ -21,4 +21,7 @@ interface IBooksService {
     fun addAuthors(request: AddAuthorsToBookRequest): BookResponse
     @Transactional
     fun removeAuthors(request: RemoveAuthorsFromBookRequest): BookResponse
+
+    @Transactional
+    fun delete(id: UUID): ResponseEntity<Void>
 }

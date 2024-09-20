@@ -3,6 +3,7 @@ package com.unitbean.library.api.services
 import com.unitbean.library.db.entity.AuthorRepository
 import com.unitbean.library.db.entity.BookModel
 import com.unitbean.library.db.entity.BooksRepository
+import com.unitbean.library.db.entity.CustomersRepository
 import com.unitbean.library.interfaces.IBooksService
 import com.unitbean.library.models.requests.AddAuthorsToBookRequest
 import com.unitbean.library.models.requests.BookCreateRequest
@@ -21,13 +22,14 @@ import java.util.*
 class BooksService(
     private val booksRepository: BooksRepository,
     private val authorRepository: AuthorRepository,
+    private val customersRepository: CustomersRepository
 ) : IBooksService {
     override fun getAll(): List<BookResponse> {
         return booksRepository.findAllByIsDeletedIsFalse().map { BookResponse.of(it) }
     }
 
     override fun create(request: BookCreateRequest): ResponseEntity<UUID> {
-        val authors = authorRepository.findAllById(request.authorIds)
+        val authors = authorRepository.findAllByIdAndIsDeletedIsFalse(request.authorIds)
 
         val book = request.run {
             BookModel(
@@ -44,19 +46,19 @@ class BooksService(
     }
 
     override fun getById(id: UUID): BookResponse {
-        val book = booksRepository.findByIdOrNull(id)
-
-        book ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
+        val book = booksRepository.findByIdAndIsDeletedIsFalse(id)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
 
         return BookResponse.of(book)
     }
 
     @Transactional
     override fun addAuthors(request: AddAuthorsToBookRequest): BookResponse {
-        val book = booksRepository.findByIdOrNull(request.bookId)
+        val book = booksRepository.findByIdAndIsDeletedIsFalse(request.bookId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
 
-        val authors = authorRepository.findAllById(request.authorIds).toSet()
+        val authors = authorRepository.findAllByIdAndIsDeletedIsFalse(request.authorIds)
+            .toSet()
 
         if (authors.isEmpty())
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Authors not found")
@@ -78,7 +80,8 @@ class BooksService(
         val book = booksRepository.findByIdOrNull(request.bookId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
 
-        val authors = authorRepository.findAllById(request.authorIds).toSet()
+        val authors = authorRepository.findAllByIdAndIsDeletedIsFalse(request.authorIds)
+            .toSet()
 
         if (authors.isEmpty())
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Authors not found")
@@ -105,4 +108,26 @@ class BooksService(
             .map { BookResponse.of(it) }
     }
 
+    @Transactional
+    override fun delete(id: UUID): ResponseEntity<Void> {
+        val book = booksRepository.findByIdAndIsDeletedIsFalse(id)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
+
+        val customer = book.customer
+        if (customer != null) {
+            customer.books.remove(book)
+            customersRepository.save(customer)
+        }
+
+        val authors = book.authors
+        authors.forEach {
+            it.books.remove(book)
+        }
+        authorRepository.saveAll(authors)
+
+        book.isDeleted = true
+        booksRepository.save(book)
+
+        return ResponseEntity.ok().build()
+    }
 }
