@@ -1,8 +1,11 @@
 package com.unitbean.library.db.entity
 
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.ManyToMany
+import jakarta.persistence.Table
 import org.springframework.data.repository.CrudRepository
-import java.util.UUID
+import java.util.*
 
 
 @Entity
@@ -24,7 +27,15 @@ class AuthorModel(
 ) : BaseEntity()
 
 interface AuthorRepository : CrudRepository<AuthorModel, UUID> {
-    fun findByIdAndIsDeletedIsFalse(id: UUID): AuthorModel?
-    fun findAllByIsDeletedFalse(): List<AuthorModel>
-    fun findAllByIdInAndIsDeletedIsFalse(ids: List<UUID>): List<AuthorModel>
+    fun findAllByIsDeleted(isDeleted: Boolean): List<AuthorModel>
+    fun findByIdAndIsDeleted(id: UUID, isDeleted: Boolean): AuthorModel?
+//    @Query("""
+//        select author from AuthorModel author
+//        inner join author.books book
+//        where author.isDeleted = false and book.isDeleted = false
+//    """)
+//    fun findAllNotDeleted(): List<AuthorModel>
+
+
+    fun findAllByIdInAndIsDeleted(ids: List<UUID>, isDeleted: Boolean): List<AuthorModel>
 }

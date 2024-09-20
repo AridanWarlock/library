@@ -1,5 +1,6 @@
 package com.unitbean.library.db.entity
 
+import jakarta.annotation.Nonnull
 import jakarta.persistence.*
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
@@ -34,25 +35,25 @@ class BookModel(
     ) : BaseEntity()
 
 interface BooksRepository : JpaRepository<BookModel, UUID> {
-    fun findByIdAndIsDeletedIsFalse(id: UUID): BookModel?
-    fun findAllByIsDeletedIsFalse(): List<BookModel>
-    fun findAllByIdInAndIsDeletedIsFalseAndCustomerIsNull(ids: List<UUID>): List<BookModel>
-    fun findAllByIdInAndIsDeletedIsFalse(ids: List<UUID>): List<BookModel>
+    fun findAllByIsDeleted(isDeleted: Boolean): List<BookModel>
+    fun findAllByIdInAndIsDeleted(ids: List<UUID>, isDeleted: Boolean): List<BookModel>
+    fun findByIdAndIsDeleted(id: UUID, isDeleted: Boolean): BookModel?
+
 
     @Query(
         value = """
         select book from books as book
         inner join books_authors_mapping as ba_map on ba_map.book_id = book.id
         inner join authors as author on author.id = ba_map.author_id
-        where !book.is_deleted and !author.is_deleted and
-        book.year_of_release > :year_of_release
+        where book.is_deleted = false and author.is_deleted = false and
+        book.year_of_release > :yearOfRelease
         group by book
-        having count(author) > :authors_count
+        having count(author) > :authorsCount
     """, nativeQuery = true
     )
     fun findAllByTask1NativeQuery(
-        @Param("year_of_release") yearOfRelease: Int,
-        @Param("authors_count") authorsCount: Int
+        @Nonnull @Param("yearOfRelease") yearOfRelease: Int,
+        @Nonnull @Param("authorsCount") authorsCount: Int
     ): List<BookModel>
 
 
@@ -61,7 +62,7 @@ interface BooksRepository : JpaRepository<BookModel, UUID> {
         inner join book.authors as author
         where book.isDeleted = false and author.isDeleted = false and
         book.yearOfRelease > :yearOfRelease
-        group by author
+        group by book
         having count(author) > :authorsCount
     """)
     fun findAllByTask1(

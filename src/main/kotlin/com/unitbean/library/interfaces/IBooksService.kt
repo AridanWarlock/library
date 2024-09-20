@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 interface IBooksService {
-    fun create(request: BookCreateRequest): ResponseEntity<UUID>
+    fun create(request: BookCreateRequest): ResponseEntity<BookResponse>
 
     fun getAll(): List<BookResponse>
     fun getById(id: UUID): BookResponse

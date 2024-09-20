@@ -22,7 +22,7 @@ data class BookResponse(
             title = book.title,
             description = book.description,
             yearOfRelease = book.yearOfRelease,
-            authorIds = book.authors.map { it.id!! },
+            authorIds = book.authors.filter { !it.isDeleted }.map { it.id!! },
             customerId = book.customer?.id
         )
     }

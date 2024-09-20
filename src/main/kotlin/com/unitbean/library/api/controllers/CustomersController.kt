@@ -18,7 +18,7 @@ class CustomersController(
     @ResponseStatus(HttpStatus.CREATED)
     fun create(
         @RequestBody request: CustomerCreateRequest
-    ): ResponseEntity<UUID> {
+    ): ResponseEntity<CustomerResponse> {
         return customersService.create(request)
     }
 
@@ -33,26 +33,38 @@ class CustomersController(
     }
 
     @GetMapping("/task_2")
-    fun getAllByTask2(request: CustomersTask2Request) = customersService.getAllByTask2(request)
+    fun getAllByTask2(
+        @RequestBody request: CustomersTask2Request
+    ) = customersService.getAllTask2(request)
 
     @GetMapping("/task_2_native")
-    fun getAllByTask2Native(request: CustomersTask2Request): List<CustomerResponse> {
-        return customersService.getAllByTask2NativeQuery(request)
+    fun getAllByTask2Native(
+        @RequestBody request: CustomersTask2Request
+    ): List<CustomerResponse> {
+        return customersService.getAllTask2NativeQuery(request)
     }
 
     @GetMapping("/task_3")
-    fun getAllByTask3(request: CustomersTask3Request) = customersService.getAllByTask3(request)
+    fun getAllByTask3(
+        @RequestBody request: CustomersTask3Request
+    ) = customersService.getAllTask3(request)
 
     @GetMapping("/task_3_native")
-    fun getAllByTask2Native(request: CustomersTask3Request): List<CustomerResponse> {
+    fun getAllByTask2Native(
+        @RequestBody request: CustomersTask3Request
+    ): List<CustomerResponse> {
         return customersService.getAllByTask3NativeQuery(request)
     }
 
     @PutMapping("/put_books")
-    fun putBooks(request: PutBooksRequest) = customersService.putBooks(request)
+    fun putBooks(
+        @RequestBody request: PutBooksRequest
+    ) = customersService.bringBackBooks(request)
 
     @PutMapping("/take_books")
-    fun takeBooks(request: TakeBooksRequest) = customersService.takeBooks(request)
+    fun takeBooks(
+        @RequestBody request: TakeBooksRequest
+    ) = customersService.takeBooks(request)
 
     @DeleteMapping("/{id}")
     fun delete(@PathVariable("id") id: UUID) = customersService.delete(id)

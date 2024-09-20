@@ -1,10 +1,8 @@
 package com.unitbean.library.api.controllers
 
-import com.unitbean.library.api.services.AuthorsService
 import com.unitbean.library.interfaces.IAuthorsService
 import com.unitbean.library.models.requests.AddBooksToAuthorRequest
 import com.unitbean.library.models.requests.AuthorCreateRequest
-import com.unitbean.library.models.requests.CustomerCreateRequest
 import com.unitbean.library.models.requests.RemoveBooksFromAuthorRequest
 import com.unitbean.library.models.responses.AuthorResponse
 import com.unitbean.library.util.annotations.MobRestController
@@ -22,7 +20,7 @@ class AuthorsController (
     @ResponseStatus(HttpStatus.CREATED)
     fun create(
         @RequestBody request: AuthorCreateRequest
-    ): ResponseEntity<UUID> {
+    ): ResponseEntity<AuthorResponse> {
         return authorsService.create(request)
     }
 
@@ -38,10 +36,14 @@ class AuthorsController (
     }
 
     @PutMapping("/add_books")
-    fun addBooks(request: AddBooksToAuthorRequest) = authorsService.addBooks(request)
+    fun addBooks(
+        @RequestBody request: AddBooksToAuthorRequest
+    ) = authorsService.addBooks(request)
 
     @PutMapping("/remove_books")
-    fun removeBooks(request: RemoveBooksFromAuthorRequest) = authorsService.removeBooks(request)
+    fun removeBooks(
+        @RequestBody request: RemoveBooksFromAuthorRequest
+    ) = authorsService.removeBooks(request)
 
     @DeleteMapping("/{id}")
     fun delete(@PathVariable("id") id: UUID) = authorsService.delete(id)

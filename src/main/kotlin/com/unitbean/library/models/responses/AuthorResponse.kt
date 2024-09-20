@@ -22,7 +22,7 @@ data class AuthorResponse(
             firstName = author.firstName,
             secondName = author.secondName,
             yearOfBirth = author.yearOfBirth,
-            bookIds = author.books.map { it.id!! }
+            bookIds = author.books.filter { !it.isDeleted }.map { it.id!! }
         )
     }
 }

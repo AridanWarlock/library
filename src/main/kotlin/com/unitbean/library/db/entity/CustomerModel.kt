@@ -29,22 +29,22 @@ class CustomerModel(
 ) : BaseEntity()
 
 interface CustomersRepository : JpaRepository<CustomerModel, UUID> {
-    fun findByIdAndIsDeletedIsFalse(id: UUID): CustomerModel?
-    fun findAllByIsDeletedIsFalse(): List<CustomerModel>
-    fun findAllByIdInAndIsDeletedIsFalse(ids: List<UUID>): List<CustomerModel>
+    fun findByIdAndIsDeleted(id: UUID, isDeleted: Boolean): CustomerModel?
+    fun findAllByIsDeleted(isDeleted: Boolean): List<CustomerModel>
+    fun findAllByIdInAndIsDeleted(ids: List<UUID>, isDeleted: Boolean): List<CustomerModel>
 
     @Query(
         value = """
-            select * from customers customer
+            select distinct customer.* from customers customer
             inner join books book on customer.id = book.customer_id
             inner join books_authors_mapping bam on book.id = bam.book_id
             inner join authors author on author.id = bam.author_id
-            where !customer.is_deleted and !book.is_deleted and !author.is_deleted and
+            where customer.is_deleted = false and book.is_deleted = false and author.is_deleted = false and
             author.year_of_birth > :yearOfBirth
         """,
         nativeQuery = true,
     )
-    fun findAllByTask2NativeQuery(@Param("yearOfBirth") yearOfBirth: Int): List<CustomerModel>
+    fun findAllTask2Native(@Param("yearOfBirth") yearOfBirth: Int): List<CustomerModel>
 
     @Query("""
         select customer from CustomerModel customer
@@ -53,20 +53,20 @@ interface CustomersRepository : JpaRepository<CustomerModel, UUID> {
         where customer.isDeleted = false and book.isDeleted = false and author.isDeleted = false
         and author.yearOfBirth > :yearOfBirth
     """)
-    fun findAllByTask2(yearOfBirth: Int): List<CustomerModel>
+    fun findAllTask2(@Param("yearOfBirth") yearOfBirth: Int): List<CustomerModel>
 
     @Query(
         value = """
-            select * from customers customer
+            select customer.* from customers customer
             inner join books book on customer.id = book.customer_id
             inner join books_authors_mapping bam on book.id = bam.book_id
             inner join authors author on author.id = bam.author_id
-            where !customer.is_deleted and !book.is_deleted and !author.is_deleted and
+            where customer.is_deleted = false and book.is_deleted = false and author.is_deleted = false and
             author.first_name = :firstName
         """,
         nativeQuery = true,
     )
-    fun findAllByTask3NativeQuery(@Param("firstName") firstName: String): List<CustomerModel>
+    fun findAllTask3Native(@Param("firstName") firstName: String): List<CustomerModel>
 
     @Query(
         """

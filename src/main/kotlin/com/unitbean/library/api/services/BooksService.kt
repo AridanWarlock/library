@@ -25,28 +25,33 @@ class BooksService(
     private val customersRepository: CustomersRepository
 ) : IBooksService {
     override fun getAll(): List<BookResponse> {
-        return booksRepository.findAllByIsDeletedIsFalse().map { BookResponse.of(it) }
+        return booksRepository.findAllByIsDeleted(false)
+            .map { BookResponse.of(it) }
     }
 
-    override fun create(request: BookCreateRequest): ResponseEntity<UUID> {
-        val authors = authorRepository.findAllByIdInAndIsDeletedIsFalse(request.authorIds)
+    override fun create(request: BookCreateRequest): ResponseEntity<BookResponse> {
+        val authors = authorRepository.findAllByIdInAndIsDeleted(request.authorIds, false)
+            .toMutableSet()
 
         val book = request.run {
             BookModel(
                 title = title,
                 description = description,
                 yearOfRelease = yearOfRelease,
-                authors = authors.toMutableSet(),
+                authors = authors,
             )
         }
 
         val savedBook = booksRepository.save(book)
 
-        return ResponseEntity(savedBook.id!!, HttpStatus.CREATED)
+        return ResponseEntity(
+            BookResponse.of(savedBook),
+            HttpStatus.CREATED
+        )
     }
 
     override fun getById(id: UUID): BookResponse {
-        val book = booksRepository.findByIdAndIsDeletedIsFalse(id)
+        val book = booksRepository.findByIdAndIsDeleted(id, false)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
 
         return BookResponse.of(book)
@@ -54,11 +59,11 @@ class BooksService(
 
     @Transactional
     override fun addAuthors(request: AddAuthorsToBookRequest): BookResponse {
-        val book = booksRepository.findByIdAndIsDeletedIsFalse(request.bookId)
+        val book = booksRepository.findByIdAndIsDeleted(request.bookId, false)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
 
-        val authors = authorRepository.findAllByIdInAndIsDeletedIsFalse(request.authorIds)
-            .toSet()
+        val authors = authorRepository.findAllByIdInAndIsDeleted(request.authorIds, false)
+            .toMutableSet()
 
         if (authors.isEmpty())
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Authors not found")
@@ -66,12 +71,11 @@ class BooksService(
         authors.forEach {
             it.books.add(book)
         }
-        authorRepository.saveAll(authors)
 
+        authorRepository.saveAll(authors)
         book.authors.addAll(authors)
 
         val savedBook = booksRepository.save(book)
-
         return BookResponse.of(savedBook)
     }
 
@@ -80,8 +84,8 @@ class BooksService(
         val book = booksRepository.findByIdOrNull(request.bookId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
 
-        val authors = authorRepository.findAllByIdInAndIsDeletedIsFalse(request.authorIds)
-            .toSet()
+        val authors = authorRepository.findAllByIdInAndIsDeleted(request.authorIds, false)
+            .toMutableSet()
 
         if (authors.isEmpty())
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Authors not found")
@@ -90,11 +94,9 @@ class BooksService(
             it.books.remove(book)
         }
         authorRepository.saveAll(authors)
-
         book.authors.removeAll(authors)
 
         val savedBook = booksRepository.save(book)
-
         return BookResponse.of(savedBook)
     }
 
@@ -110,20 +112,8 @@ class BooksService(
 
     @Transactional
     override fun delete(id: UUID): ResponseEntity<Void> {
-        val book = booksRepository.findByIdAndIsDeletedIsFalse(id)
+        val book = booksRepository.findByIdAndIsDeleted(id, false)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
-
-        val customer = book.customer
-        if (customer != null) {
-            customer.books.remove(book)
-            customersRepository.save(customer)
-        }
-
-        val authors = book.authors
-        authors.forEach {
-            it.books.remove(book)
-        }
-        authorRepository.saveAll(authors)
 
         book.isDeleted = true
         booksRepository.save(book)

@@ -12,7 +12,7 @@ interface IAuthorsService {
     fun getAll(): List<AuthorResponse>
     fun getById(id: UUID): AuthorResponse
 
-    fun create(request: AuthorCreateRequest): ResponseEntity<UUID>
+    fun create(request: AuthorCreateRequest): ResponseEntity<AuthorResponse>
 
     @Transactional
     fun addBooks(request: AddBooksToAuthorRequest): AuthorResponse

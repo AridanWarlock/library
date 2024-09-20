@@ -37,11 +37,11 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-allOpen {
-	annotation("javax.persistence.Entity")
-	annotation("javax.persistence.Embeddable")
-	annotation("javax.persistence.MappedSuperclass")
-}
+//allOpen {
+//	annotation("javax.persistence.Entity")
+//	annotation("javax.persistence.Embeddable")
+//	annotation("javax.persistence.MappedSuperclass")
+//}
 
 kotlin {
 	compilerOptions {

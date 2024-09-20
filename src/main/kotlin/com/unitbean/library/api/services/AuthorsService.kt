@@ -21,11 +21,12 @@ class AuthorsService(
     private val booksRepository: BooksRepository
 ) : IAuthorsService {
     override fun getAll(): List<AuthorResponse> {
-        return authorRepository.findAllByIsDeletedFalse().map { AuthorResponse.of(it) }
+        return authorRepository.findAllByIsDeleted(false)
+            .map { AuthorResponse.of(it) }
     }
 
     override fun getById(id: UUID): AuthorResponse {
-        val author = authorRepository.findByIdAndIsDeletedIsFalse(id)
+        val author = authorRepository.findByIdAndIsDeleted(id, false)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
 
         return AuthorResponse.of(author)
@@ -33,21 +34,22 @@ class AuthorsService(
 
     @Transactional
     override fun addBooks(request: AddBooksToAuthorRequest): AuthorResponse {
-        val author = authorRepository.findByIdAndIsDeletedIsFalse(request.authorId)
+        val author = authorRepository.findByIdAndIsDeleted(request.authorId, false)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
 
-        val books = booksRepository.findAllByIdInAndIsDeletedIsFalse(request.bookIds)
-            .toMutableSet()
+        val books = booksRepository.findAllByIdInAndIsDeleted(request.bookIds, false)
+            .toSet()
 
         if (books.isEmpty())
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Books not found")
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Books by ids not found")
 
         books.forEach { book ->
             book.authors.add(author)
         }
-        booksRepository.saveAll(books)
 
-        author.books.addAll(books)
+        val savedBooks = booksRepository.saveAll(books)
+
+        author.books.addAll(savedBooks)
         val savedAuthor = authorRepository.save(author)
 
         return AuthorResponse.of(savedAuthor)
@@ -55,10 +57,10 @@ class AuthorsService(
 
     @Transactional
     override fun removeBooks(request: RemoveBooksFromAuthorRequest): AuthorResponse {
-        val author = authorRepository.findByIdAndIsDeletedIsFalse(request.authorId)
+        val author = authorRepository.findByIdAndIsDeleted(request.authorId, false)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
 
-        val books = booksRepository.findAllByIdInAndIsDeletedIsFalse(request.bookIds)
+        val books = booksRepository.findAllByIdInAndIsDeleted(request.bookIds, false)
             .toMutableSet()
 
         if (books.isEmpty())
@@ -76,35 +78,31 @@ class AuthorsService(
         return AuthorResponse.of(savedAuthor)
     }
 
-    override fun create(request: AuthorCreateRequest): ResponseEntity<UUID> {
-        val books = booksRepository.findAllByIdInAndIsDeletedIsFalse(request.bookIds)
+    override fun create(request: AuthorCreateRequest): ResponseEntity<AuthorResponse> {
+        val books = booksRepository.findAllByIdInAndIsDeleted(request.bookIds, false)
+            .toMutableSet()
 
         val author = request.run {
             AuthorModel(
                 firstName = firstName,
                 secondName = secondName,
                 yearOfBirth = yearOfBirth,
-                books = books.toMutableSet()
+                books = books
             )
         }
 
         val savedAuthor = authorRepository.save(author)
 
-        return ResponseEntity(savedAuthor.id!!, HttpStatus.CREATED)
+        return ResponseEntity(
+            AuthorResponse.of(savedAuthor),
+            HttpStatus.CREATED
+        )
     }
 
     @Transactional
     override fun delete(id: UUID): ResponseEntity<Void> {
-        val author = authorRepository.findByIdAndIsDeletedIsFalse(id)
+        val author = authorRepository.findByIdAndIsDeleted(id, false)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
-
-        val books = author.books
-
-        books.forEach {
-            it.authors.remove(author)
-        }
-
-        booksRepository.saveAll(books)
 
         author.isDeleted = true
         authorRepository.save(author)

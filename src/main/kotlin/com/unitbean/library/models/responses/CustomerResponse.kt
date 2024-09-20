@@ -22,7 +22,7 @@ data class CustomerResponse(
                 firstName = firstName,
                 secondName = secondName,
                 phone = phone,
-                bookIds = books.map { it.id!! }
+                bookIds = books.filter { !it.isDeleted }.map { it.id!! }
             )
         }
     }
