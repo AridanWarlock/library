@@ -1,10 +1,7 @@
 package com.unitbean.library.api.controllers
 
-import com.unitbean.library.api.services.CustomersService
 import com.unitbean.library.interfaces.ICustomersService
-import com.unitbean.library.models.requests.CustomerCreateRequest
-import com.unitbean.library.models.requests.CustomersTask2Request
-import com.unitbean.library.models.requests.CustomersTask3Request
+import com.unitbean.library.models.requests.*
 import com.unitbean.library.models.responses.CustomerResponse
 import com.unitbean.library.util.annotations.MobRestController
 import org.springframework.http.HttpStatus
@@ -12,10 +9,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-//@CrossOrigin
-//@MobRestController("api/customers")
-@RestController
-@RequestMapping("/api/customers")
+@MobRestController("api/customers")
 class CustomersController(
     private val customersService: ICustomersService
 ) {
@@ -54,4 +48,12 @@ class CustomersController(
         return customersService.getAllByTask3NativeQuery(request)
     }
 
+    @PutMapping("/put_books")
+    fun putBooks(request: PutBooksRequest) = customersService.putBooks(request)
+
+    @PutMapping("/take_books")
+    fun takeBooks(request: TakeBooksRequest) = customersService.takeBooks(request)
+
+    @DeleteMapping("/{id}")
+    fun delete(@PathVariable("id") id: UUID) = customersService.delete(id)
 }

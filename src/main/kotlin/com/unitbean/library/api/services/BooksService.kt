@@ -29,7 +29,7 @@ class BooksService(
     }
 
     override fun create(request: BookCreateRequest): ResponseEntity<UUID> {
-        val authors = authorRepository.findAllByIdAndIsDeletedIsFalse(request.authorIds)
+        val authors = authorRepository.findAllByIdInAndIsDeletedIsFalse(request.authorIds)
 
         val book = request.run {
             BookModel(
@@ -57,7 +57,7 @@ class BooksService(
         val book = booksRepository.findByIdAndIsDeletedIsFalse(request.bookId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
 
-        val authors = authorRepository.findAllByIdAndIsDeletedIsFalse(request.authorIds)
+        val authors = authorRepository.findAllByIdInAndIsDeletedIsFalse(request.authorIds)
             .toSet()
 
         if (authors.isEmpty())
@@ -80,7 +80,7 @@ class BooksService(
         val book = booksRepository.findByIdOrNull(request.bookId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
 
-        val authors = authorRepository.findAllByIdAndIsDeletedIsFalse(request.authorIds)
+        val authors = authorRepository.findAllByIdInAndIsDeletedIsFalse(request.authorIds)
             .toSet()
 
         if (authors.isEmpty())

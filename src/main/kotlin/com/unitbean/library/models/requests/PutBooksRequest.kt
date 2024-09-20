@@ -3,7 +3,7 @@ package com.unitbean.library.models.requests
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.UUID
 
-data class BringBackBooksRequest(
+data class PutBooksRequest(
     @JsonProperty("customer_id")
     val customerId: UUID,
 

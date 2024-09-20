@@ -21,7 +21,7 @@ interface ICustomersService {
     @Transactional
     fun takeBooks(request: TakeBooksRequest): CustomerResponse
     @Transactional
-    fun putBooks(request: BringBackBooksRequest): CustomerResponse
+    fun putBooks(request: PutBooksRequest): CustomerResponse
 
     @Transactional
     fun delete(id: UUID): ResponseEntity<Void>

@@ -6,7 +6,6 @@ import com.unitbean.library.db.entity.CustomersRepository
 import com.unitbean.library.interfaces.ICustomersService
 import com.unitbean.library.models.requests.*
 import com.unitbean.library.models.responses.CustomerResponse
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -48,7 +47,7 @@ class CustomersService(
     }
 
     override fun create(request: CustomerCreateRequest): ResponseEntity<UUID> {
-        val books = booksRepository.findAllByIdAndIsDeletedIsFalse(request.bookIds)
+        val books = booksRepository.findAllByIdInAndIsDeletedIsFalse(request.bookIds)
             .toMutableSet()
 
         val customer = request.run {
@@ -64,12 +63,12 @@ class CustomersService(
         return ResponseEntity(savedCustomer.id!!, HttpStatus.CREATED)
     }
 
-    override fun putBooks(request: BringBackBooksRequest): CustomerResponse {
+    override fun putBooks(request: PutBooksRequest): CustomerResponse {
         val customer = customersRepository.findByIdAndIsDeletedIsFalse(request.customerId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")
 
         val booksOnCustomer = customer.books.map { it.id!! }
-        val books = booksRepository.findAllByIdAndIsDeletedIsFalse(booksOnCustomer)
+        val books = booksRepository.findAllByIdInAndIsDeletedIsFalse(booksOnCustomer)
             .toSet()
 
         if (books.isEmpty())
@@ -94,7 +93,7 @@ class CustomersService(
         val customer = customersRepository.findByIdAndIsDeletedIsFalse(request.customerId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")
 
-        val books = booksRepository.findAllByIdAndIsDeletedIsFalseAndCustomerIsNull(request.bookIds.toList())
+        val books = booksRepository.findAllByIdInAndIsDeletedIsFalseAndCustomerIsNull(request.bookIds.toList())
             .toSet()
 
         if (books.isEmpty())
@@ -119,7 +118,7 @@ class CustomersService(
         val customer = customersRepository.findByIdAndIsDeletedIsFalse(id)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")
 
-        val books = booksRepository.findAllByIdAndIsDeletedIsFalse(
+        val books = booksRepository.findAllByIdInAndIsDeletedIsFalse(
             customer.books.map { it.id!! }
         )
 

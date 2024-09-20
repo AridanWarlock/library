@@ -8,7 +8,6 @@ import com.unitbean.library.models.requests.AddBooksToAuthorRequest
 import com.unitbean.library.models.requests.AuthorCreateRequest
 import com.unitbean.library.models.requests.RemoveBooksFromAuthorRequest
 import com.unitbean.library.models.responses.AuthorResponse
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -37,7 +36,7 @@ class AuthorsService(
         val author = authorRepository.findByIdAndIsDeletedIsFalse(request.authorId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
 
-        val books = booksRepository.findAllByIdAndIsDeletedIsFalse(request.bookIds)
+        val books = booksRepository.findAllByIdInAndIsDeletedIsFalse(request.bookIds)
             .toMutableSet()
 
         if (books.isEmpty())
@@ -59,7 +58,7 @@ class AuthorsService(
         val author = authorRepository.findByIdAndIsDeletedIsFalse(request.authorId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
 
-        val books = booksRepository.findAllByIdAndIsDeletedIsFalse(request.bookIds)
+        val books = booksRepository.findAllByIdInAndIsDeletedIsFalse(request.bookIds)
             .toMutableSet()
 
         if (books.isEmpty())
@@ -78,7 +77,7 @@ class AuthorsService(
     }
 
     override fun create(request: AuthorCreateRequest): ResponseEntity<UUID> {
-        val books = booksRepository.findAllByIdAndIsDeletedIsFalse(request.bookIds)
+        val books = booksRepository.findAllByIdInAndIsDeletedIsFalse(request.bookIds)
 
         val author = request.run {
             AuthorModel(

@@ -2,9 +2,7 @@ package com.unitbean.library.api.controllers
 
 import com.unitbean.library.api.services.BooksService
 import com.unitbean.library.interfaces.IBooksService
-import com.unitbean.library.models.requests.AuthorCreateRequest
-import com.unitbean.library.models.requests.BookCreateRequest
-import com.unitbean.library.models.requests.BooksTask1Request
+import com.unitbean.library.models.requests.*
 import com.unitbean.library.models.responses.BookResponse
 import com.unitbean.library.util.annotations.MobRestController
 import org.springframework.http.HttpStatus
@@ -12,10 +10,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
-//@CrossOrigin
-//@MobRestController(value = "api/books")
-@RestController
-@RequestMapping("/api/books")
+@MobRestController(value = "api/books")
 class BooksController(
     private val booksService: IBooksService
 ) {
@@ -41,4 +36,13 @@ class BooksController(
 
     @GetMapping("/task_1_native")
     fun getAllByTask1Native(request: BooksTask1Request) = booksService.getAllByTask1NativeQuery(request)
+
+    @PutMapping("/add_authors")
+    fun addAuthors(request: AddAuthorsToBookRequest) = booksService.addAuthors(request)
+
+    @PutMapping("/remove_authors")
+    fun removeAuthors(request: RemoveAuthorsFromBookRequest) = booksService.removeAuthors(request)
+
+    @DeleteMapping("/{id}")
+    fun deleteById(@PathVariable("id") id: UUID) = booksService.delete(id)
 }
