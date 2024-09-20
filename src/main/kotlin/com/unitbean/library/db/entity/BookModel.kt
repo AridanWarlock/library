@@ -39,34 +39,40 @@ interface BooksRepository : JpaRepository<BookModel, UUID> {
     fun findAllByIdInAndIsDeleted(ids: List<UUID>, isDeleted: Boolean): List<BookModel>
     fun findByIdAndIsDeleted(id: UUID, isDeleted: Boolean): BookModel?
 
-
     @Query(
         value = """
-        select book from books as book
-        inner join books_authors_mapping as ba_map on ba_map.book_id = book.id
-        inner join authors as author on author.id = ba_map.author_id
-        where book.is_deleted = false and author.is_deleted = false and
-        book.year_of_release > :yearOfRelease
-        group by book
-        having count(author) > :authorsCount
-    """, nativeQuery = true
+        select book.* from (
+	        select keyBook.id, count(author.id)
+	        from books as keyBook
+	        inner join books_authors_mapping as ba_map on ba_map.book_id = keyBook.id
+	        inner join authors as author on author.id = ba_map.author_id
+	        where keyBook.is_deleted = false and author.is_deleted = false
+            and keyBook.year_of_release > :yearOfRelease
+
+	        group by (keyBook.id)
+	        having count(author.id) > :authorsCount
+	    ) as bookIdToCount
+        inner join books as book on book.id = bookIdToCount.id
+        """, nativeQuery = true
     )
     fun findAllByTask1NativeQuery(
-        @Nonnull @Param("yearOfRelease") yearOfRelease: Int,
-        @Nonnull @Param("authorsCount") authorsCount: Int
+        yearOfRelease: Int,
+        authorsCount: Int
     ): List<BookModel>
 
 
-    @Query("""
+    @Query(
+        """
         select book from BookModel as book
         inner join book.authors as author
         where book.isDeleted = false and author.isDeleted = false and
         book.yearOfRelease > :yearOfRelease
         group by book
         having count(author) > :authorsCount
-    """)
+    """
+    )
     fun findAllByTask1(
-        @Param("yearOfRelease") yearOfRelease: Int,
-        @Param("authorsCount") authorsCount: Int
+        yearOfRelease: Int,
+        authorsCount: Int
     ): List<BookModel>
 }

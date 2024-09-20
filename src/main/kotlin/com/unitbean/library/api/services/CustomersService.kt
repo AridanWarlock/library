@@ -85,9 +85,6 @@ class CustomersService(
             .filter { it.id in request.bookIds && !it.isDeleted }
             .toMutableSet()
 
-        if (books.isEmpty())
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Books by ids not found")
-
         books.forEach {
             it.customer = null
         }
@@ -105,8 +102,8 @@ class CustomersService(
         val customer = customersRepository.findByIdAndIsDeleted(request.customerId, false)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")
 
-        val books = customer.books
-            .filter { it.id in request.bookIds && !it.isDeleted }
+        val books = booksRepository.findAllByIdInAndIsDeleted(request.bookIds, false)
+            .filter { it.id in request.bookIds && it.customer == null && !it.isDeleted }
             .toMutableSet()
 
         if (books.isEmpty())
