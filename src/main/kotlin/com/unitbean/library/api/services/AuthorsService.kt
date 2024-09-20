@@ -20,64 +20,6 @@ class AuthorsService(
     private val authorRepository: AuthorRepository,
     private val booksRepository: BooksRepository
 ) : IAuthorsService {
-    override fun getAll(): List<AuthorResponse> {
-        return authorRepository.findAllByIsDeleted(false)
-            .map { AuthorResponse.of(it) }
-    }
-
-    override fun getById(id: UUID): AuthorResponse {
-        val author = authorRepository.findByIdAndIsDeleted(id, false)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
-
-        return AuthorResponse.of(author)
-    }
-
-    @Transactional
-    override fun addBooks(request: AddBooksToAuthorRequest): AuthorResponse {
-        val author = authorRepository.findByIdAndIsDeleted(request.authorId, false)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
-
-        val books = booksRepository.findAllByIdInAndIsDeleted(request.bookIds, false)
-            .toSet()
-
-        if (books.isEmpty())
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Books by ids not found")
-
-        books.forEach { book ->
-            book.authors.add(author)
-        }
-
-        val savedBooks = booksRepository.saveAll(books)
-
-        author.books.addAll(savedBooks)
-        val savedAuthor = authorRepository.save(author)
-
-        return AuthorResponse.of(savedAuthor)
-    }
-
-    @Transactional
-    override fun removeBooks(request: RemoveBooksFromAuthorRequest): AuthorResponse {
-        val author = authorRepository.findByIdAndIsDeleted(request.authorId, false)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
-
-        val books = booksRepository.findAllByIdInAndIsDeleted(request.bookIds, false)
-            .toMutableSet()
-
-        if (books.isEmpty())
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Books not found")
-
-        books.forEach { book ->
-            book.authors.remove(author)
-        }
-        booksRepository.saveAll(books)
-
-        author.books.removeAll(books)
-
-        val savedAuthor = authorRepository.save(author)
-
-        return AuthorResponse.of(savedAuthor)
-    }
-
     override fun create(request: AuthorCreateRequest): ResponseEntity<AuthorResponse> {
         val books = booksRepository.findAllByIdInAndIsDeleted(request.bookIds, false)
             .toMutableSet()
@@ -97,6 +39,54 @@ class AuthorsService(
             AuthorResponse.of(savedAuthor),
             HttpStatus.CREATED
         )
+    }
+
+    override fun getAll() = authorRepository
+        .findAllByIsDeleted(false)
+        .map { AuthorResponse.of(it) }
+
+    override fun getById(id: UUID): AuthorResponse {
+        val author = authorRepository.findByIdAndIsDeleted(id, false)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
+
+        return AuthorResponse.of(author)
+    }
+
+    @Transactional
+    override fun addBooks(request: AddBooksToAuthorRequest): AuthorResponse {
+        val author = authorRepository.findByIdAndIsDeleted(request.authorId, false)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
+
+        val books = booksRepository.findAllByIdInAndIsDeleted(request.bookIds, false)
+            .toMutableSet()
+
+        if (books.isEmpty())
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Books by ids not found")
+
+        books.forEach { it.authors.add(author) }
+        val savedBooks = booksRepository.saveAll(books)
+
+        author.books.addAll(savedBooks)
+        val savedAuthor = authorRepository.save(author)
+
+        return AuthorResponse.of(savedAuthor)
+    }
+
+    @Transactional
+    override fun removeBooks(request: RemoveBooksFromAuthorRequest): AuthorResponse {
+        val author = authorRepository.findByIdAndIsDeleted(request.authorId, false)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found")
+
+        val books = booksRepository.findAllByIdInAndIsDeleted(request.bookIds, false)
+            .toMutableSet()
+
+        books.forEach { it.authors.remove(author) }
+        booksRepository.saveAll(books)
+
+        author.books.removeAll(books)
+        val savedAuthor = authorRepository.save(author)
+
+        return AuthorResponse.of(savedAuthor)
     }
 
     @Transactional

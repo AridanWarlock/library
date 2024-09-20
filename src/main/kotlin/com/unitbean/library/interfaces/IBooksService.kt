@@ -14,8 +14,8 @@ interface IBooksService {
 
     fun getAll(): List<BookResponse>
     fun getById(id: UUID): BookResponse
-    fun getAllByTask1(request: BooksTask1Request): List<BookResponse>
-    fun getAllByTask1NativeQuery(request: BooksTask1Request): List<BookResponse>
+    fun getAllTask1(request: BooksTask1Request): List<BookResponse>
+    fun getAllTask1Native(request: BooksTask1Request): List<BookResponse>
 
     @Transactional
     fun addAuthors(request: AddAuthorsToBookRequest): BookResponse

@@ -9,10 +9,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 interface IAuthorsService {
+    fun create(request: AuthorCreateRequest): ResponseEntity<AuthorResponse>
+
     fun getAll(): List<AuthorResponse>
     fun getById(id: UUID): AuthorResponse
-
-    fun create(request: AuthorCreateRequest): ResponseEntity<AuthorResponse>
 
     @Transactional
     fun addBooks(request: AddBooksToAuthorRequest): AuthorResponse

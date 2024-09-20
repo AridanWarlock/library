@@ -18,10 +18,9 @@ class CustomersService(
     private val customersRepository: CustomersRepository,
     private val booksRepository: BooksRepository,
 ) : ICustomersService {
-    override fun getAll(): List<CustomerResponse> {
-        return customersRepository.findAllByIsDeleted(false)
-            .map { CustomerResponse.of(it) }
-    }
+    override fun getAll() = customersRepository
+        .findAllByIsDeleted(false)
+        .map { CustomerResponse.of(it) }
 
     override fun getById(id: UUID): CustomerResponse {
         val customer = customersRepository.findByIdAndIsDeleted(id, false)
@@ -30,26 +29,22 @@ class CustomersService(
         return CustomerResponse.of(customer)
     }
 
-    override fun getAllTask2(request: CustomersTask2Request): List<CustomerResponse> {
-        return customersRepository.findAllTask2(request.yearOfBirth)
-            .map { CustomerResponse.of(it) }
-    }
+    override fun getAllTask2(request: CustomersTask2Request) = customersRepository
+        .findAllTask2(request.yearOfBirth)
+        .map { CustomerResponse.of(it) }
 
+    override fun getAllTask2Native(request: CustomersTask2Request) = customersRepository
+        .findAllTask2Native(request.yearOfBirth)
+        .map { CustomerResponse.of(it) }
 
-    override fun getAllTask2NativeQuery(request: CustomersTask2Request): List<CustomerResponse> {
-        return customersRepository.findAllTask2Native(request.yearOfBirth)
-            .map { CustomerResponse.of(it) }
-    }
+    override fun getAllTask3(request: CustomersTask3Request) = customersRepository
+        .findAllByTask3(request.firstName)
+        .map { CustomerResponse.of(it) }
 
-    override fun getAllTask3(request: CustomersTask3Request): List<CustomerResponse> {
-        return customersRepository.findAllByTask3(request.firstName)
-            .map { CustomerResponse.of(it) }
-    }
+    override fun getAllTask3Native(request: CustomersTask3Request) = customersRepository
+        .findAllTask3Native(request.firstName)
+        .map { CustomerResponse.of(it) }
 
-    override fun getAllByTask3NativeQuery(request: CustomersTask3Request): List<CustomerResponse> {
-        return customersRepository.findAllTask3Native(request.firstName)
-            .map { CustomerResponse.of(it) }
-    }
 
     override fun create(request: CustomerCreateRequest): ResponseEntity<CustomerResponse> {
         val books = booksRepository.findAllByIdInAndIsDeleted(request.bookIds, false)
@@ -65,9 +60,7 @@ class CustomersService(
         }
         val savedCustomer = customersRepository.save(customer)
 
-        books.forEach {
-            it.customer = savedCustomer
-        }
+        books.forEach { it.customer = savedCustomer }
         booksRepository.saveAll(books)
 
         return ResponseEntity(
@@ -85,12 +78,8 @@ class CustomersService(
             .filter { it.id in request.bookIds && !it.isDeleted }
             .toMutableSet()
 
-        books.forEach {
-            it.customer = null
-        }
-
+        books.forEach { it.customer = null }
         booksRepository.saveAll(books)
-
         customer.books.removeAll(books)
 
         val savedCustomer = customersRepository.save(customer)
@@ -107,14 +96,10 @@ class CustomersService(
             .toMutableSet()
 
         if (books.isEmpty())
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Books not found")
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Books by ids not found")
 
-        books.forEach {
-            it.customer = customer
-        }
-
+        books.forEach { it.customer = customer }
         booksRepository.saveAll(books)
-
         customer.books.addAll(books)
 
         val savedCustomer = customersRepository.save(customer)

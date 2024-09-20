@@ -15,7 +15,6 @@ import java.util.*
 class AuthorsController (
     private val authorsService: IAuthorsService
 ){
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun create(
@@ -23,7 +22,6 @@ class AuthorsController (
     ): ResponseEntity<AuthorResponse> {
         return authorsService.create(request)
     }
-
 
     @GetMapping
     fun getAll(): List<AuthorResponse> {

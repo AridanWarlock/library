@@ -3,7 +3,6 @@ package com.unitbean.library.api.services
 import com.unitbean.library.db.entity.AuthorRepository
 import com.unitbean.library.db.entity.BookModel
 import com.unitbean.library.db.entity.BooksRepository
-import com.unitbean.library.db.entity.CustomersRepository
 import com.unitbean.library.interfaces.IBooksService
 import com.unitbean.library.models.requests.AddAuthorsToBookRequest
 import com.unitbean.library.models.requests.BookCreateRequest
@@ -22,13 +21,7 @@ import java.util.*
 class BooksService(
     private val booksRepository: BooksRepository,
     private val authorRepository: AuthorRepository,
-    private val customersRepository: CustomersRepository
 ) : IBooksService {
-    override fun getAll(): List<BookResponse> {
-        return booksRepository.findAllByIsDeleted(false)
-            .map { BookResponse.of(it) }
-    }
-
     override fun create(request: BookCreateRequest): ResponseEntity<BookResponse> {
         val authors = authorRepository.findAllByIdInAndIsDeleted(request.authorIds, false)
             .toMutableSet()
@@ -41,7 +34,6 @@ class BooksService(
                 authors = authors,
             )
         }
-
         val savedBook = booksRepository.save(book)
 
         return ResponseEntity(
@@ -50,12 +42,23 @@ class BooksService(
         )
     }
 
+    override fun getAll() = booksRepository.findAllByIsDeleted(false)
+        .map { BookResponse.of(it) }
+
     override fun getById(id: UUID): BookResponse {
         val book = booksRepository.findByIdAndIsDeleted(id, false)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
 
         return BookResponse.of(book)
     }
+
+    override fun getAllTask1(request: BooksTask1Request) = booksRepository
+        .findAllByTask1(request.yearOfRelease, request.authorsCount)
+        .map { BookResponse.of(it) }
+
+    override fun getAllTask1Native(request: BooksTask1Request) = booksRepository
+        .findAllByTask1NativeQuery(request.yearOfRelease, request.authorsCount)
+        .map { BookResponse.of(it) }
 
     @Transactional
     override fun addAuthors(request: AddAuthorsToBookRequest): BookResponse {
@@ -68,10 +71,7 @@ class BooksService(
         if (authors.isEmpty())
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Authors not found")
 
-        authors.forEach {
-            it.books.add(book)
-        }
-
+        authors.forEach { it.books.add(book) }
         authorRepository.saveAll(authors)
         book.authors.addAll(authors)
 
@@ -90,24 +90,12 @@ class BooksService(
         if (authors.isEmpty())
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Authors not found")
 
-        authors.forEach {
-            it.books.remove(book)
-        }
+        authors.forEach { it.books.remove(book) }
         authorRepository.saveAll(authors)
         book.authors.removeAll(authors)
 
         val savedBook = booksRepository.save(book)
         return BookResponse.of(savedBook)
-    }
-
-    override fun getAllByTask1(request: BooksTask1Request): List<BookResponse> {
-        return booksRepository.findAllByTask1(request.yearOfRelease, request.authorsCount)
-            .map { BookResponse.of(it) }
-    }
-
-    override fun getAllByTask1NativeQuery(request: BooksTask1Request): List<BookResponse> {
-        return booksRepository.findAllByTask1NativeQuery(request.yearOfRelease, request.authorsCount)
-            .map { BookResponse.of(it) }
     }
 
     @Transactional

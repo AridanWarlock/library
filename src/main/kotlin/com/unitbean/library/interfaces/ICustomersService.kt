@@ -7,16 +7,14 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 interface ICustomersService {
+    fun create(request: CustomerCreateRequest): ResponseEntity<CustomerResponse>
+
     fun getAll(): List<CustomerResponse>
     fun getById(id: UUID): CustomerResponse
-
     fun getAllTask2(request: CustomersTask2Request): List<CustomerResponse>
-    fun getAllTask2NativeQuery(request: CustomersTask2Request): List<CustomerResponse>
-
+    fun getAllTask2Native(request: CustomersTask2Request): List<CustomerResponse>
     fun getAllTask3(request: CustomersTask3Request): List<CustomerResponse>
-    fun getAllByTask3NativeQuery(request: CustomersTask3Request): List<CustomerResponse>
-
-    fun create(request: CustomerCreateRequest): ResponseEntity<CustomerResponse>
+    fun getAllTask3Native(request: CustomersTask3Request): List<CustomerResponse>
 
     @Transactional
     fun takeBooks(request: TakeBooksRequest): CustomerResponse

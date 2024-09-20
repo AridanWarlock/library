@@ -24,18 +24,10 @@ class AuthorModel(
     @ManyToMany(mappedBy = "authors")
     val books: MutableSet<BookModel> = mutableSetOf(),
 
-) : BaseEntity()
+    ) : BaseEntity()
 
 interface AuthorRepository : CrudRepository<AuthorModel, UUID> {
     fun findAllByIsDeleted(isDeleted: Boolean): List<AuthorModel>
     fun findByIdAndIsDeleted(id: UUID, isDeleted: Boolean): AuthorModel?
-//    @Query("""
-//        select author from AuthorModel author
-//        inner join author.books book
-//        where author.isDeleted = false and book.isDeleted = false
-//    """)
-//    fun findAllNotDeleted(): List<AuthorModel>
-
-
     fun findAllByIdInAndIsDeleted(ids: List<UUID>, isDeleted: Boolean): List<AuthorModel>
 }

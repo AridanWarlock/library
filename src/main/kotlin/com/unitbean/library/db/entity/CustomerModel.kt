@@ -26,7 +26,7 @@ class CustomerModel(
     )
     val books: MutableSet<BookModel> = mutableSetOf(),
 
-) : BaseEntity()
+    ) : BaseEntity()
 
 interface CustomersRepository : JpaRepository<CustomerModel, UUID> {
     fun findByIdAndIsDeleted(id: UUID, isDeleted: Boolean): CustomerModel?
@@ -46,13 +46,15 @@ interface CustomersRepository : JpaRepository<CustomerModel, UUID> {
     )
     fun findAllTask2Native(@Param("yearOfBirth") yearOfBirth: Int): List<CustomerModel>
 
-    @Query("""
+    @Query(
+        """
         select customer from CustomerModel customer
         inner join customer.books as book
         inner join book.authors as author
         where customer.isDeleted = false and book.isDeleted = false and author.isDeleted = false
         and author.yearOfBirth > :yearOfBirth
-    """)
+    """
+    )
     fun findAllTask2(@Param("yearOfBirth") yearOfBirth: Int): List<CustomerModel>
 
     @Query(

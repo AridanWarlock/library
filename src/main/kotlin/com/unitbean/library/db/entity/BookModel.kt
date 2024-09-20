@@ -1,12 +1,9 @@
 package com.unitbean.library.db.entity
 
-import jakarta.annotation.Nonnull
 import jakarta.persistence.*
 import org.springframework.data.jpa.repository.JpaRepository
-import java.util.*
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.query.Param
-
+import java.util.*
 
 @Entity
 @Table(name = "books")
