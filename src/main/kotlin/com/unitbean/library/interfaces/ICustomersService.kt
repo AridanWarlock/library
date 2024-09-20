@@ -1,10 +1,9 @@
 package com.unitbean.library.interfaces
 
-import com.unitbean.library.models.requests.CustomerCreateRequest
-import com.unitbean.library.models.requests.CustomersTask2Request
-import com.unitbean.library.models.requests.CustomersTask3Request
+import com.unitbean.library.models.requests.*
 import com.unitbean.library.models.responses.CustomerResponse
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 interface ICustomersService {
@@ -18,4 +17,9 @@ interface ICustomersService {
     fun getAllByTask3NativeQuery(request: CustomersTask3Request): List<CustomerResponse>
 
     fun create(request: CustomerCreateRequest): ResponseEntity<UUID>
+
+    @Transactional
+    fun takeBooks(request: TakeBooksRequest): CustomerResponse
+    @Transactional
+    fun putBooks(request: BringBackBooksRequest): CustomerResponse
 }

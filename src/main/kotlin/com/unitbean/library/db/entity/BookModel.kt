@@ -29,12 +29,13 @@ class BookModel(
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
-    val customer: CustomerModel? = null,
+    var customer: CustomerModel? = null,
 
     ) : BaseEntity()
 
 interface BooksRepository : JpaRepository<BookModel, UUID> {
     fun findAllByIsDeletedIsFalse(): List<BookModel>
+    fun findAllByIdAndIsDeletedIsFalseAndCustomerIsNull(ids: List<UUID>): List<BookModel>
 
     @Query(
         value = """

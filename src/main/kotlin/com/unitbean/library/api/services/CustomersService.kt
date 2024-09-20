@@ -4,9 +4,7 @@ import com.unitbean.library.db.entity.BooksRepository
 import com.unitbean.library.db.entity.CustomerModel
 import com.unitbean.library.db.entity.CustomersRepository
 import com.unitbean.library.interfaces.ICustomersService
-import com.unitbean.library.models.requests.CustomerCreateRequest
-import com.unitbean.library.models.requests.CustomersTask2Request
-import com.unitbean.library.models.requests.CustomersTask3Request
+import com.unitbean.library.models.requests.*
 import com.unitbean.library.models.responses.CustomerResponse
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
@@ -27,7 +25,7 @@ class CustomersService(
     override fun getById(id: UUID): CustomerResponse {
         val customer = customersRepository.findByIdOrNull(id)
 
-        customer ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer not found")
+        customer ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")
 
         return CustomerResponse.of(customer)
     }
@@ -63,5 +61,54 @@ class CustomersService(
         val savedCustomer = customersRepository.save(customer)
 
         return ResponseEntity(savedCustomer.id!!, HttpStatus.CREATED)
+    }
+
+    override fun putBooks(request: BringBackBooksRequest): CustomerResponse {
+        val customer = customersRepository.findByIdOrNull(request.customerId)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")
+
+        val booksOnCustomer = customer.books.map { it.id!! }
+        val books = booksRepository.findAllById(booksOnCustomer).toSet()
+
+        if (books.isEmpty())
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Books not found")
+
+        books.forEach {
+            it.customer = null
+        }
+
+        booksRepository.saveAll(books)
+
+        customer.books.removeAll(books)
+
+        val savedCustomer = customersRepository.save(customer)
+
+
+        return CustomerResponse.of(savedCustomer)
+
+    }
+
+    override fun takeBooks(request: TakeBooksRequest): CustomerResponse {
+        val customer = customersRepository.findByIdOrNull(request.customerId)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")
+
+        val books = booksRepository.findAllByIdAndIsDeletedIsFalseAndCustomerIsNull(request.bookIds.toList())
+            .toSet()
+
+        if (books.isEmpty())
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Books not found")
+
+        books.forEach {
+            it.customer = customer
+        }
+
+        booksRepository.saveAll(books)
+
+        customer.books.addAll(books)
+
+        val savedCustomer = customersRepository.save(customer)
+
+
+        return CustomerResponse.of(savedCustomer)
     }
 }

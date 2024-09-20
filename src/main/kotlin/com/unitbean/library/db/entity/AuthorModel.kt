@@ -25,4 +25,5 @@ class AuthorModel(
 
 interface AuthorRepository : CrudRepository<AuthorModel, UUID> {
     fun findAllByIsDeletedFalse(): List<AuthorModel>
+    fun findAllByIdAndIsDeletedIsFalse(ids: List<UUID>): List<AuthorModel>
 }

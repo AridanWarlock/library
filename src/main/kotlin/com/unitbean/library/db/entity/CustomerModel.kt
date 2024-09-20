@@ -30,6 +30,7 @@ class CustomerModel(
 
 interface CustomersRepository : JpaRepository<CustomerModel, UUID> {
     fun findAllByIsDeletedIsFalse(): List<CustomerModel>
+    fun findAllByIdAndIsDeletedIsFalse(ids: List<UUID>): List<CustomerModel>
 
     @Query(
         value = """
